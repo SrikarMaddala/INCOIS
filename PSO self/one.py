@@ -62,6 +62,9 @@ class PSO:
 def rastrigin(x):
     n = len(x)
     return 10*n + sum([xi**2 - 10*np.cos(2*np.pi*xi) for xi in x])
+def spherical(x):
+    n = len(x)
+    return 10*n + sum([xi**2 for xi in x])
 
 if __name__ == '__main__':
     pso = PSO(rastrigin, 30, 2, -5.12, 5.12, 0.5, 1, 2)
