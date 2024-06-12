@@ -15,6 +15,8 @@
 \usepackage{blindtext}
 \usepackage{pdfpages}
 \usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
 \usepackage[a4paper]{geometry}
 \usepackage[myheadings]{fullpage}
 \usepackage{fancyhdr}
@@ -35,7 +37,30 @@
     pdftitle={Overleaf Example},
     pdfpagemode=FullScreen,
     }
+    \lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
 
+\lstset{style=mystyle}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 \urlstyle{same}
 
 
@@ -50,13 +75,14 @@
 \pagestyle{fancy}
 \fancyhf{}
 \setlength\headheight{15pt}
-\fancyhead[L]{BE PROJECT}
+\fancyhead[L]{SUMMER PROJECT}
 
 %-------------------------------------------------------------------------------
 % TITLE PAGE
 %-------------------------------------------------------------------------------
 
 \begin{document}
+\section{Project}
 
 \title{ \normalsize \textsc{project on}
 		\\ [2.0cm]
@@ -73,28 +99,179 @@
 Scientist F, ODM Division\\
 Indian National Centre for Ocean Information Services(INCOIS), Hyderbad\\ }
 
-\maketitle
 
-\newpage
 \section*{ABSTRACT}
 **
 
 \section*{INTRODUCTION}
 
- \href{https://www.geeksforgeeks.org/implementation-of-particle-swarm-optimization/?ref=ml_lbp}{Implementation of PSO} \\
- \href{https://www.geeksforgeeks.org/particle-swarm-optimization-pso-an-overview/}{Overview form geeks for geeks} \\
-  \href{https://link.springer.com/article/10.1007/s11831-021-09694-4#Sec3}{research paper!}
+In computational science, particle swarm optimization (PSO)[1] is a computational method that optimizes a problem by iteratively trying to improve a candidate solution with regard to a given measure of quality. It solves a problem by having a population of candidate solutions, here dubbed particles, and moving these particles around in the search-space according to simple mathematical formula over the particle's position and velocity. Each particle's movement is influenced by its local best known position, but is also guided toward the best known positions in the search-space, which are updated as better positions are found by other particles. This is expected to move the swarm toward the best solutions.
 
+PSO is a metaheuristic as it makes few or no assumptions about the problem being optimized and can search very large spaces of candidate solutions. Also, PSO does not use the gradient of the problem being optimized, which means PSO does not require that the optimization problem be differentiable as is required by classic optimization methods such as gradient descent and quasi-newton methods. However, metaheuristics such as PSO do not guarantee an optimal solution is ever found.
 
+\section{Algorithm}
 
+\subsection{Parameters}
+To prevent divergence ("explosion") the inertia weight must be smaller than 1. The two other parameters can be then derived thanks to the constriction approach,[16] or freely selected, but the analyses suggest convergence domains to constrain them. Typical values are in 
+\textit{[1,3]}
+\\
+\\The PSO parameters can also be tuned by using another overlaying optimizer, a concept known as meta-optimization or even fine-tuned during the optimization, e.g., by means of fuzzy logic.\\ \\
+We call the parameter\textbf{ W the inertia weight constant}. It is between 0 and 1 and determines how much should the particle keep on with its previous velocity (i.e., speed and direction of the search). The parameters and \textbf{C1 \& C2 are called the cognitive and the social coefficients} respectively. They controls how much weight should be given between refining the search result of the particle itself and recognizing the search result of the swarm. We can consider these parameters \textbf{controls the trade off between exploration and exploitation}.\\ \\
+\textit{Another property of PSO is that it can be parallelized easily. As we are manipulating multiple particles to find the optimal solution, each particles can be updated in parallel and we only need to collect the updated value of Gbest once per iteration. This makes map-reduce architecture a perfect candidate to implement PSO.} \\ \\
+\textit{.............it does not depend on the gradient of the objective function......}\\ \\
+\subsection{Minima of a given function}
+\textit{So, how can we find the minimum point in this function?} For sure, we can resort to exhaustive search: If we check the value of 
+ for every point on the plane, we can find the minimum point. Or we can just randomly find some sample points on the plane and see which one gives the lowest value on f(x,y)
+ if we think it is too expensive to search every point. However, we also note from the shape of f(x,y)
+ that if we have found a point with a smaller value of f(x,y)
+, it is easier to find an even smaller value around its proximity.
 
+This is how a particle swarm optimization does. Similar to the flock of birds looking for food, we start with a number of random points on the plane (call them particles) and let them look for the minimum point in random directions. At each step, \textbf{every particle should search around the minimum point it ever found as well as around the minimum point found by the entire swarm of particles}. After certain iterations, we consider the minimum point of the function as the minimum point ever explored by this swarm of particles.
 
+\section{Sample Codes}
 
+\subsection{Psuedo PSO Code}
+
+%\lstinputlisting[language=Octave]{BitXorMatrix.m}
+
+\begin{verbatim}
+
+    for each particle i = 1, ..., S do
+    Initialize the particle's position with a uniformly distributed random vector: xi ~ U(blo, bup)
+    Initialize the particle's best known position to its initial position: pi ← xi
+    if f(pi) < f(g) then
+        update the swarm's best known position: g ← pi
+    Initialize the particle's velocity: vi ~ U(-|bup-blo|, |bup-blo|)
+while a termination criterion is not met do:
+    for each particle i = 1, ..., S do
+        for each dimension d = 1, ..., n do
+            Pick random numbers: rp, rg ~ U(0,1)
+            Update the particle's velocity: vi,d ← w vi,d + φp rp (pi,d-xi,d) + φg rg (gd-xi,d)
+        Update the particle's position: xi ← xi + vi
+        if f(xi) < f(pi) then
+            Update the particle's best known position: pi ← xi
+            if f(pi) < f(g) then
+                Update the swarm's best known position: g ← pi
+                
+\end{verbatim}
+
+\subsection{Minima Code}
+\begin{verbatim}
+    import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+ 
+def f(x,y):
+    "Objective function"
+    return (x-3.14)**2 + (y-2.72)**2 + np.sin(3*x+1.41) + np.sin(4*y-1.73)
     
+# Compute and plot the function in 3D within [0,5]x[0,5]
+x, y = np.array(np.meshgrid(np.linspace(0,5,100), np.linspace(0,5,100)))
+z = f(x, y)
+ 
+# Find the global minimum
+x_min = x.ravel()[z.argmin()]
+y_min = y.ravel()[z.argmin()]
+ 
+# Hyper-parameter of the algorithm
+c1 = c2 = 0.1
+w = 0.8
+ 
+# Create particles
+n_particles = 20
+np.random.seed(100)
+X = np.random.rand(2, n_particles) * 5
+V = np.random.randn(2, n_particles) * 0.1
+ 
+# Initialize data
+pbest = X
+pbest_obj = f(X[0], X[1])
+gbest = pbest[:, pbest_obj.argmin()]
+gbest_obj = pbest_obj.min()
+ 
+def update():
+    "Function to do one iteration of particle swarm optimization"
+    global V, X, pbest, pbest_obj, gbest, gbest_obj
+    # Update params
+    r1, r2 = np.random.rand(2)
+    V = w * V + c1*r1*(pbest - X) + c2*r2*(gbest.reshape(-1,1)-X)
+    X = X + V
+    obj = f(X[0], X[1])
+    pbest[:, (pbest_obj >= obj)] = X[:, (pbest_obj >= obj)]
+    pbest_obj = np.array([pbest_obj, obj]).min(axis=0)
+    gbest = pbest[:, pbest_obj.argmin()]
+    gbest_obj = pbest_obj.min()
+ 
+# Set up base figure: The contour map
+fig, ax = plt.subplots(figsize=(8,6))
+fig.set_tight_layout(True)
+img = ax.imshow(z, extent=[0, 5, 0, 5], origin='lower', cmap='viridis', alpha=0.5)
+fig.colorbar(img, ax=ax)
+ax.plot([x_min], [y_min], marker='x', markersize=5, color="white")
+contours = ax.contour(x, y, z, 10, colors='black', alpha=0.4)
+ax.clabel(contours, inline=True, fontsize=8, fmt="%.0f")
+pbest_plot = ax.scatter(pbest[0], pbest[1], marker='o', color='black', alpha=0.5)
+p_plot = ax.scatter(X[0], X[1], marker='o', color='blue', alpha=0.5)
+p_arrow = ax.quiver(X[0], X[1], V[0], V[1], color='blue', width=0.005, angles='xy', scale_units='xy', scale=1)
+gbest_plot = plt.scatter([gbest[0]], [gbest[1]], marker='*', s=100, color='black', alpha=0.4)
+ax.set_xlim([0,5])
+ax.set_ylim([0,5])
+ 
+def animate(i):
+    "Steps of PSO: algorithm update and show in plot"
+    title = 'Iteration {:02d}'.format(i)
+    # Update params
+    update()
+    # Set picture
+    ax.set_title(title)
+    pbest_plot.set_offsets(pbest.T)
+    p_plot.set_offsets(X.T)
+    p_arrow.set_offsets(X.T)
+    p_arrow.set_UVC(V[0], V[1])
+    gbest_plot.set_offsets(gbest.reshape(1,-1))
+    return ax, pbest_plot, p_plot, p_arrow, gbest_plot
+ 
+anim = FuncAnimation(fig, animate, frames=list(range(1,50)), interval=500, blit=False, repeat=True)
+anim.save("PSO.gif", dpi=120, writer="imagemagick")
+ 
+print("PSO found best solution at f({})={}".format(gbest, gbest_obj))
+print("Global optimal at f({})={}".format([x_min,y_min], f(x_min,y_min)))
+\end{verbatim}
+
+\section{Convergence}
+\subsection{Premature Convergence}
+Particle Swarm Optimization (PSO) itself is susceptible to premature convergence, where the swarm gets stuck in a local optimum (good but not the best solution) and stops searching for the global optimum (the absolute best solution). Here's a breakdown of the issue and some ways to tackle it:
+
+\subsubsection{Why Premature Convergence Happens:}
+\textbf{
+Information Sharing:} Particles heavily rely on the global best (gbest) information to update their positions. If all particles converge towards a local best early on, they might stop exploring other regions of the search space that could hold the global optimum.
+Loss of Diversity: Over time, particles become too similar to each other, reducing the overall exploration ability of the swarm.
+\subsubsection{Approaches to Prevent Premature Convergence:}
+
+\textbf{Inertia Weight}: In the standard PSO update equation, an\textbf{ inertia weight (w) is used to control the influence of a particle's previous velocity on its current movement}. A high inertia weight encourages exploration by allowing particles to continue with their current momentum, while a low weight focuses on recent information from pbest and gbest.  Here are some strategies:
+
+\textbf{Decreasing Inertia Weight}: Start with a higher inertia weight and gradually decrease it over iterations. This allows for\textbf{ broader exploration initially} and then refines the search towards the later stages.
+\textbf{Random Inertia Weight:} Introduce randomness in the inertia weight within a defined range. This injects some\textbf{ variability into particle movement and helps avoid getting stuck in local optima}.
+
+\textbf{Velocity Clamping:} Limit the maximum velocity of particles. This\textbf{ prevents them from overshooting }promising areas and maintains some level of exploration even when influenced by gbest.
+
+\textbf{Cognitive Acceleration Coefficient:} The cognitive coefficient (c1) controls the \textbf{influence of pbest on particle movement.} A slightly increased c1 value can encourage particles to explore their own promising regions a bit more, potentially leading them to discover the global optimum.
+
+\textbf{Neighborhood Topologies:} Standard PSO uses a global best topology where all particles share information about gbest. Alternative neighborhood structures can be implemented,\textbf{ where particles only interact with a smaller group of neighbors.} This can promote exploration by limiting the spread of local best information and encouraging particles to search diverse regions.
+
+\textbf{Hybrid PSO Variants}: Techniques like\textbf{ niching or mutation} can be incorporated into PSO. Niching penalizes particles that are too close together, promoting diversity in the swarm. Mutation can occasionally introduce random changes to particle positions, helping them escape local traps.
+
+By implementing these strategies, you can enhance the exploration capabilities of PSO and reduce the chances of premature convergence, leading to a higher probability of finding the global optimum solution.
 
 
 \section*{REFERENCES}
-\subsection*{**}
+\subsection*{online yay}
+\href{https://in.mathworks.com/matlabcentral/fileexchange/11559-particle-swarm-optimization-simulation}{An animated simulation of Particles in 2D searching for a global minima of a simple function using Particle Swarm Optimization algorithm} \\
+ \href{https://www.geeksforgeeks.org/implementation-of-particle-swarm-optimization/?ref=ml_lbp}{Implementation of PSO} \\
+ \href{https://www.geeksforgeeks.org/particle-swarm-optimization-pso-an-overview/}{Overview form geeks for geeks} \\
+  \href{https://link.springer.com/article/10.1007/s11831-021-09694-4#Sec3}{research paper!}
+\\
+\href{https://machinelearningmastery.com/a-gentle-introduction-to-particle-swarm-optimization/}{PSO detailed}
 
 
 
